@@ -16,13 +16,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const res = await API.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
-    return res.data;
-  };
+  const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+
+  try {
+    await login(email, password);   // ✅ use context login
+    navigate('/dashboard');
+  } catch (err) {
+    setError(
+      err.response?.data?.error || 
+      err.message || 
+      'Login failed'
+    );
+  }
+
+  setLoading(false);
+};
 
   const register = async (data) => {
     const res = await API.post('/auth/register', data);
