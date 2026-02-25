@@ -10,36 +10,33 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
     }
+
     setLoading(false);
   }, []);
 
-  const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+  const login = async (email, password) => {
+    const res = await API.post('/auth/login', { email, password });
 
-  try {
-    await login(email, password);   // ✅ use context login
-    navigate('/dashboard');
-  } catch (err) {
-    setError(
-      err.response?.data?.error || 
-      err.message || 
-      'Login failed'
-    );
-  }
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('user', JSON.stringify(res.data.user));
 
-  setLoading(false);
-};
+    setUser(res.data.user);
+
+    return res.data;
+  };
 
   const register = async (data) => {
     const res = await API.post('/auth/register', data);
+
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('user', JSON.stringify(res.data.user));
+
     setUser(res.data.user);
+
     return res.data;
   };
 

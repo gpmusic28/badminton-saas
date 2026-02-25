@@ -14,32 +14,24 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch('https://badminton-saas.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+ const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
+  try {
+    await login(email, password);   // ✅ use context login
+    navigate('/dashboard');
+  } catch (err) {
+    setError(
+      err.response?.data?.error ||
+      err.message ||
+      'Login failed'
+    );
+  }
 
-      login(data.user, data.token);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message);
-    }
-    
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   return (
     <div style={{ minHeight:'100vh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center',padding:20,fontFamily:sans,color:C.text,position:'relative',overflow:'hidden' }}>
