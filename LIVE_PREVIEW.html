@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Pro Ultimate - Live Preview</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 18px;
+        }
+        
+        .tabs {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #64748b;
+        }
+        
+        .tab:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .view {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .admin-panel {
+            display: flex;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #0f172a;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .logo-text {
+            font-size: 18px;
+            font-weight: 900;
+            color: white;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+        
+        .menu-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+        
+        .menu-icon {
+            font-size: 20px;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+        
+        .content h2 {
+            font-size: 32px;
+            font-weight: 900;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        
+        .content-subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .card-body {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        
+        .tournament-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .tournament-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .tournament-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .tournament-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+        }
+        
+        .tournament-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+        
+        .tournament-meta {
+            display: flex;
+            gap: 15px;
+            color: #64748b;
+            font-size: 13px;
+        }
+        
+        .tournament-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-item-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        
+        .stat-item-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .demo-login {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .demo-login h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        
+        .demo-login p {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .demo-accounts {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .demo-accounts h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .account-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .account-btn:hover {
+            background: white;
+            border-color: #667eea;
+        }
+        
+        .account-info {
+            text-align: left;
+        }
+        
+        .account-email {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .account-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        
+        .notification.success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        
+        .feature-desc {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏸 Tournament Pro Ultimate</h1>
+            <p>Enterprise-Grade Tournament Management SaaS - Live Interactive Preview</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showView('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showView('admin')">🏢 Frappe Admin</button>
+            <button class="tab" onclick="showView('crm')">💼 CRM Interface</button>
+            <button class="tab" onclick="showView('tournaments')">🏆 Tournaments</button>
+            <button class="tab" onclick="showView('features')">✨ Features</button>
+            <button class="tab" onclick="showView('login')">🔐 Login Demo</button>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard" class="view active">
+            <div class="dashboard">
+                <h2 style="margin-bottom: 30px;">📊 Real-time Dashboard</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="revenue">$127,450</div>
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-change">↗ +12.5% vs last month</div>
+                    </div>
+                    
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="users">2,847</div>
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-change">↗ +8.2% vs last month</div>
+                    </div>
+                    
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="stat-icon">🏢</div>
+                        <div class="stat-value" id="orgs">156</div>
+                        <div class="stat-label">Organizations</div>
+                        <div class="stat-change">↗ +5.1% vs last month</div>
+                    </div>
+                    
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-value" id="tournaments">423</div>
+                        <div class="stat-label">Live Tournaments</div>
+                        <div class="stat-change">↗ +15.3% vs last month</div>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🚀 System Status</div>
+                            <span class="badge success">All Operational</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>API Server</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.98%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 99.98%"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Database</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.99%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 99.99%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Email Service</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.95%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 99.95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">💳 Payment Summary</div>
+                            <span class="badge info">Today</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="font-size: 32px; font-weight: 900; color: #10b981; margin-bottom: 15px;">$12,450</div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Razorpay</span>
+                                <span style="font-weight: 600;">$8,200</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Stripe</span>
+                                <span style="font-weight: 600;">$3,100</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>PayPal</span>
+                                <span style="font-weight: 600;">$1,150</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📧 Notifications Sent</div>
+                            <span class="badge warning">Live</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>📧 Email</span>
+                                    <span style="font-weight: 700; color: #667eea;">2,847</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>📱 WhatsApp</span>
+                                    <span style="font-weight: 700; color: #25D366;">1,234</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>💬 SMS</span>
+                                    <span style="font-weight: 700; color: #f5576c;">892</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>🔔 Push</span>
+                                    <span style="font-weight: 700; color: #4facfe;">3,521</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel View -->
+        <div id="admin" class="view">
+            <div class="admin-panel">
+                <div class="sidebar">
+                    <div class="sidebar-logo">
+                        <div class="logo-icon">🏸</div>
+                        <div class="logo-text">Tournament Pro</div>
+                    </div>
+                    
+                    <div class="menu-item active">
+                        <span class="menu-icon">📊</span>
+                        <span>Dashboard</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">👥</span>
+                        <span>Users</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">🏢</span>
+                        <span>Organizations</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">🏆</span>
+                        <span>Tournaments</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">💳</span>
+                        <span>Billing & Plans</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">📊</span>
+                        <span>Analytics</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">🗄️</span>
+                        <span>Database Tools</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">🔌</span>
+                        <span>API & Webhooks</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">📧</span>
+                        <span>Email Templates</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-icon">📝</span>
+                        <span>System Logs</span>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <h2>Frappe-Style Admin Panel</h2>
+                    <p class="content-subtitle">Complete backend control like Frappe Desk / Django Admin</p>
+                    
+                    <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                            <div style="color: #64748b; font-size: 13px; margin-bottom: 8px;">Total Users</div>
+                            <div style="font-size: 28px; font-weight: 900; color: #0f172a;">2,847</div>
+                            <div style="color: #10b981; font-size: 12px; margin-top: 5px;">↗ +8.2%</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                            <div style="color: #64748b; font-size: 13px; margin-bottom: 8px;">Organizations</div>
+                            <div style="font-size: 28px; font-weight: 900; color: #0f172a;">156</div>
+                            <div style="color: #10b981; font-size: 12px; margin-top: 5px;">↗ +5.1%</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                            <div style="color: #64748b; font-size: 13px; margin-bottom: 8px;">Revenue (MRR)</div>
+                            <div style="font-size: 28px; font-weight: 900; color: #0f172a;">$42.5K</div>
+                            <div style="color: #10b981; font-size: 12px; margin-top: 5px;">↗ +12.5%</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                            <div style="color: #64748b; font-size: 13px; margin-bottom: 8px;">Active Now</div>
+                            <div style="font-size: 28px; font-weight: 900; color: #0f172a;">342</div>
+                            <div style="color: #667eea; font-size: 12px; margin-top: 5px;">⚡ Live</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Recent Organizations</div>
+                            </div>
+                            <div class="card-body">
+                                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                                    <div style="font-weight: 600; color: #0f172a;">Chennai Badminton Club</div>
+                                    <div style="font-size: 12px; color: #64748b;">Pro Plan • 24 members</div>
+                                </div>
+                                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                                    <div style="font-weight: 600; color: #0f172a;">Mumbai Sports Academy</div>
+                                    <div style="font-size: 12px; color: #64748b;">Enterprise • 45 members</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #0f172a;">Delhi Tournament Hub</div>
+                                    <div style="font-size: 12px; color: #64748b;">Starter • 12 members</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">System Health</div>
+                                <span class="badge success">Operational</span>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>🌐 API Server</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.98%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>🗄️ Database</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.99%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span>📧 Email</span>
+                                    <span style="color: #10b981; font-weight: 600;">99.95%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>☁️ Storage</span>
+                                    <span style="color: #10b981; font-weight: 600;">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRM View -->
+        <div id="crm" class="view">
+            <div class="dashboard">
+                <h2 style="margin-bottom: 10px;">💼 Modern CRM Interface</h2>
+                <p style="color: #64748b; margin-bottom: 30px;">HubSpot / Salesforce style customer management</p>
+                
+                <div class="tournament-card">
+                    <div class="tournament-header">
+                        <div class="tournament-avatar">S</div>
+                        <div class="tournament-info" style="flex: 1;">
+                            <h3>Summer Championship 2024</h3>
+                            <div class="tournament-meta">
+                                <span>📍 Chennai Indoor Complex</span>
+                                <span>📅 Jul 15-17, 2024</span>
+                                <span class="badge success">LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tournament-stats">
+                        <div class="stat-item">
+                            <div class="stat-item-value">8</div>
+                            <div class="stat-item-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value">156</div>
+                            <div class="stat-item-label">Participants</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value" style="color: #10b981;">$12.5K</div>
+                            <div class="stat-item-label">Revenue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tournament-card">
+                    <div class="tournament-header">
+                        <div class="tournament-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">N</div>
+                        <div class="tournament-info" style="flex: 1;">
+                            <h3>National Open Tournament</h3>
+                            <div class="tournament-meta">
+                                <span>📍 Mumbai Sports Arena</span>
+                                <span>📅 Aug 10-14, 2024</span>
+                                <span class="badge info">UPCOMING</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tournament-stats">
+                        <div class="stat-item">
+                            <div class="stat-item-value">12</div>
+                            <div class="stat-item-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value">234</div>
+                            <div class="stat-item-label">Participants</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value" style="color: #10b981;">$18.9K</div>
+                            <div class="stat-item-label">Revenue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tournament-card">
+                    <div class="tournament-header">
+                        <div class="tournament-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">S</div>
+                        <div class="tournament-info" style="flex: 1;">
+                            <h3>State Level Competition</h3>
+                            <div class="tournament-meta">
+                                <span>📍 Delhi Stadium</span>
+                                <span>📅 Jul 18-20, 2024</span>
+                                <span class="badge success">LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tournament-stats">
+                        <div class="stat-item">
+                            <div class="stat-item-value">6</div>
+                            <div class="stat-item-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value">98</div>
+                            <div class="stat-item-label">Participants</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-item-value" style="color: #10b981;">$8.2K</div>
+                            <div class="stat-item-label">Revenue</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tournaments View -->
+        <div id="tournaments" class="view">
+            <div class="dashboard">
+                <h2 style="margin-bottom: 30px;">🏆 Tournament Management</h2>
+                
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Create Tournament</div>
+                            <span class="badge info">3-Step Wizard</span>
+                        </div>
+                        <div class="card-body">
+                            <p>Professional 3-step tournament creation wizard with:</p>
+                            <ul style="margin-top: 15px; padding-left: 20px;">
+                                <li>Basic information & venue</li>
+                                <li>Categories with custom rules</li>
+                                <li>Payment & registration settings</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Bracket Generation</div>
+                            <span class="badge success">Smart Algorithm</span>
+                        </div>
+                        <div class="card-body">
+                            <p>Automatic bracket generation:</p>
+                            <ul style="margin-top: 15px; padding-left: 20px;">
+                                <li>Zero BYE vs BYE matches</li>
+                                <li>Supports 2-64 teams</li>
+                                <li>Single/double elimination</li>
+                                <li>Third place match option</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Live Scoring</div>
+                            <span class="badge warning">BWF Compliant</span>
+                        </div>
+                        <div class="card-body">
+                            <p>Professional umpire portal:</p>
+                            <ul style="margin-top: 15px; padding-left: 20px;">
+                                <li>4-step toss workflow</li>
+                                <li>Rally point scoring</li>
+                                <li>Keyboard shortcuts</li>
+                                <li>Real-time bracket updates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features View -->
+        <div id="features" class="view">
+            <div class="dashboard">
+                <h2 style="margin-bottom: 30px;">✨ Enterprise Features</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">💳</div>
+                        <div class="feature-title">Payment Gateways</div>
+                        <div class="feature-desc">Razorpay, Stripe, PayPal integration with auto-webhooks</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📧</div>
+                        <div class="feature-title">Email Service</div>
+                        <div class="feature-desc">SendGrid integration with templates and campaigns</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-title">WhatsApp</div>
+                        <div class="feature-desc">Twilio WhatsApp API for match updates and alerts</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <div class="feature-title">SMS Alerts</div>
+                        <div class="feature-desc">Twilio SMS for OTP and notifications</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-title">Telegram Bot</div>
+                        <div class="feature-desc">Automated notifications to admin channels</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">☁️</div>
+                        <div class="feature-title">File Storage</div>
+                        <div class="feature-desc">Cloudinary & AWS S3 for uploads and CDN</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-title">Google OAuth</div>
+                        <div class="feature-desc">Login with Google for easy authentication</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔔</div>
+                        <div class="feature-title">Push Notifications</div>
+                        <div class="feature-desc">Firebase Cloud Messaging for mobile</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Analytics</div>
+                        <div class="feature-desc">Google Analytics & Mixpanel integration</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🐛</div>
+                        <div class="feature-title">Error Tracking</div>
+                        <div class="feature-desc">Sentry for real-time error monitoring</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-title">Real-time Updates</div>
+                        <div class="feature-desc">WebSocket for live score updates</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-title">White Label</div>
+                        <div class="feature-desc">Custom branding with logo and colors</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login View -->
+        <div id="login" class="view">
+            <div class="demo-login">
+                <h2>🔐 Login Demo</h2>
+                <p>Try different user roles to see different permissions</p>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="admin@cbachennai.in" value="admin@cbachennai.in">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" value="admin123">
+                    </div>
+                    <button class="btn-primary" onclick="demoLogin()">Sign In →</button>
+                </div>
+
+                <div class="demo-accounts">
+                    <h3>Demo Accounts (Click to Use)</h3>
+                    <div class="account-btn" onclick="fillLogin('admin@cbachennai.in', 'admin123')">
+                        <div class="account-info">
+                            <div class="account-email">admin@cbachennai.in</div>
+                            <div class="account-role">Org Admin - Full Access</div>
+                        </div>
+                        <span style="color: #667eea; font-weight: 700;">Use →</span>
+                    </div>
+                    <div class="account-btn" onclick="fillLogin('organizer@cbachennai.in', 'organizer123')">
+                        <div class="account-info">
+                            <div class="account-email">organizer@cbachennai.in</div>
+                            <div class="account-role">Organizer - Create & Manage</div>
+                        </div>
+                        <span style="color: #667eea; font-weight: 700;">Use →</span>
+                    </div>
+                    <div class="account-btn" onclick="fillLogin('umpire@cbachennai.in', 'umpire123')">
+                        <div class="account-info">
+                            <div class="account-email">umpire@cbachennai.in</div>
+                            <div class="account-role">Umpire - Score Matches Only</div>
+                        </div>
+                        <span style="color: #667eea; font-weight: 700;">Use →</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification success">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">✅</span>
+            <div>
+                <div style="font-weight: 700; color: #0f172a; margin-bottom: 3px;">Login Successful!</div>
+                <div style="font-size: 13px; color: #64748b;">Redirecting to dashboard...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Show selected view
+            document.getElementById(viewId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Auto-updating stats
+        setInterval(() => {
+            const revenue = document.getElementById('revenue');
+            const users = document.getElementById('users');
+            const orgs = document.getElementById('orgs');
+            const tournaments = document.getElementById('tournaments');
+            
+            if (revenue) {
+                let val = parseInt(revenue.textContent.replace(/\D/g, ''));
+                revenue.textContent = '$' + (val + Math.floor(Math.random() * 100)).toLocaleString();
+            }
+            
+            if (users) {
+                let val = parseInt(users.textContent.replace(/,/g, ''));
+                users.textContent = (val + Math.floor(Math.random() * 5)).toLocaleString();
+            }
+        }, 3000);
+
+        // Demo login
+        function fillLogin(email, password) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password;
+        }
+
+        function demoLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const notification = document.getElementById('notification');
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                showView('dashboard');
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('.tab').classList.add('active');
+            }, 2000);
+        }
+
+        // Animate progress bars on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>
