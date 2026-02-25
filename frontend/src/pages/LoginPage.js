@@ -20,19 +20,14 @@ export default function LoginPage() {
   setError('');
 
   try {
-    await login(email, password);   // ✅ use context login
+    await login(email, password); // use AuthContext properly
     navigate('/dashboard');
   } catch (err) {
-    setError(
-      err.response?.data?.error ||
-      err.message ||
-      'Login failed'
-    );
+    setError(err.response?.data?.error || 'Login failed');
   }
 
   setLoading(false);
 };
-
   return (
     <div style={{ minHeight:'100vh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center',padding:20,fontFamily:sans,color:C.text,position:'relative',overflow:'hidden' }}>
       <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
