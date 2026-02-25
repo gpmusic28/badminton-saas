@@ -10,14 +10,26 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://badminton-saas.netlify.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://badminton-saas.netlify.app"
+    ];
+
+    // allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
-app.use(express.json());
+
+// Handle preflight explicitly
+app.options('*', cors());
 
 // Uploads directory
 const uploadsDir = path.join(__dirname, 'uploads');
