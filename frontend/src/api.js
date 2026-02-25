@@ -11,5 +11,5 @@ const API = axios.create({
   baseURL,
   withCredentials: true
 });
-
+console.log("API URL:", process.env.REACT_APP_API_URL);
 export default API;
