@@ -7,7 +7,8 @@ const auth = async (req, res, next) => {
     if (!token) return res.status(401).json({ error: 'Authentication required' });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
-    if (!user || user.status !== 'active') return res.status(401).json({ error: 'Account inactive or not found' });
+    if (!user || !user.isActive)
+  return res.status(401).json({ error: 'Account inactive or not found' });
     user.lastLogin = new Date(); await user.save();
     req.user = user;
     next();
