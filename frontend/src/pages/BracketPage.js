@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../api';
 import { useAuth } from '../context/AuthContext';
-
+const pulseStyle = `
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+`;
 function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRefresh }) {
   const [showStart, setShowStart] = useState(false);
   const [court, setCourt] = useState('1');
@@ -27,7 +33,29 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
   const t2Sets = match.scores?.filter(s => s.team2 > s.team1).length || 0;
 
   return (
-    <div style={{ width: 210, border: `2px solid ${statusColors[match.status] || '#e2e8f0'}`, borderRadius: 12, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.07)', margin: '5px 0' }}>
+    <div
+  style={{
+    width: 230,
+    borderRadius: 14,
+    overflow: 'hidden',
+    background: '#1e293b',
+    color: '#f1f5f9',
+    border: match.winner
+      ? '2px solid #22d3ee'
+      : match.status === 'live'
+      ? '2px solid #10b981'
+      : '1px solid #334155',
+    boxShadow:
+      match.status === 'live'
+        ? '0 0 18px rgba(16,185,129,0.6)'
+        : '0 6px 18px rgba(0,0,0,0.35)',
+    margin: '8px 0',
+    transition: 'all 0.3s ease',
+    animation: match.status === 'live'
+      ? 'livePulse 1.8s infinite'
+      : 'none'
+  }}
+>
       <div style={{ background: match.status === 'live' ? '#10b981' : match.status === 'completed' ? '#3b82f6' : '#f8fafc', padding: '5px 10px', display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: match.status === 'live' || match.status === 'completed' ? '#fff' : '#94a3b8' }}>
         <span>{match.round} M{match.matchNumber}</span>
         <span>{statusLabels[match.status] || '⏳'}</span>
@@ -55,6 +83,7 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
             <button onClick={() => setShowStart(true)} style={{ width: '100%', padding: '6px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>▶ Start Match</button>
           ) : (
             <div>
+              <style>{pulseStyle}</style>
               <input value={court} onChange={e => setCourt(e.target.value)} placeholder="Court #" style={{ width: '100%', padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 12, marginBottom: 4 }} />
               <select value={server} onChange={e => setServer(e.target.value)} style={{ width: '100%', padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 12, marginBottom: 6 }}>
                 <option value="team1">Serving: {match.team1?.name?.substring(0, 15)}</option>
@@ -86,6 +115,11 @@ export default function BracketPage() {
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [umpireCode, setUmpireCode] = useState('');
+  const containerRef = React.useRef(null);
+const [scale, setScale] = useState(1);
+const [isDragging, setIsDragging] = useState(false);
+const [startX, setStartX] = useState(0);
+const [scrollLeft, setScrollLeft] = useState(0);
 
   const load = async () => {
     try {
@@ -99,8 +133,30 @@ export default function BracketPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); const i = setInterval(load, 5000); return () => clearInterval(i); }, [id, categoryId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+  load();
+  const i = setInterval(load, 5000);
+  return () => clearInterval(i);
+}, [id, categoryId]);
 
+// Auto-focus LIVE match
+useEffect(() => {
+  if (!data?.bracket) return;
+
+  const liveMatch = data.bracket.rounds
+    ?.flat()
+    .find(m => m.status === 'live');
+
+  if (liveMatch) {
+    const el = document.getElementById(`match-${liveMatch.id}`);
+    if (el && containerRef.current) {
+      containerRef.current.scrollTo({
+        left: el.offsetLeft - 300,
+        behavior: 'smooth'
+      });
+    }
+  }
+}, [data]);
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>Loading bracket...</div>;
   if (!data?.bracket) return (
     <div style={{ textAlign: 'center', padding: 80 }}>
@@ -111,6 +167,9 @@ export default function BracketPage() {
   );
 
   const { bracket } = data;
+  const finalRound = bracket.rounds[bracket.rounds.length - 1];
+const finalMatch = finalRound?.[0];
+const champion = finalMatch?.winner?.name || null;
   const isOrganizer = user && tournament?.organizer === user.id;
 
   return (
@@ -146,28 +205,116 @@ export default function BracketPage() {
       {/* Auto-refresh indicator */}
       <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>🔄 Auto-refreshing every 5 seconds</div>
 
-      {/* Bracket */}
-      <div style={{ overflowX: 'auto', paddingBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 32, minWidth: 'fit-content', alignItems: 'flex-start' }}>
-          {bracket.rounds?.map((round, rIdx) => {
-            const roundName = rIdx === bracket.totalRounds - 1 ? 'FINAL' : rIdx === bracket.totalRounds - 2 ? 'SEMI FINALS' : rIdx === bracket.totalRounds - 3 ? 'QUARTER FINALS' : `ROUND ${rIdx + 1}`;
-            const liveCount = round.filter(m => m.status === 'live').length;
-            return (
-              <div key={rIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontWeight: 800, fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, background: '#f1f5f9', padding: '5px 14px', borderRadius: 20, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {roundName}
-                  {liveCount > 0 && <span style={{ background: '#ef4444', color: '#fff', borderRadius: 10, padding: '1px 6px', fontSize: 10 }}>🔴 {liveCount}</span>}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {round.map(match => (
-                    <MatchCard key={match.id} match={match} isOrganizer={isOrganizer} tournamentId={id} categoryId={categoryId} onRefresh={load} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* PRO BRACKET SYSTEM */}
+<div
+  ref={containerRef}
+  style={{
+    overflow: 'auto',
+    cursor: isDragging ? 'grabbing' : 'grab',
+    padding: window.innerWidth < 768 ? '40px 20px' : '60px 40px',
+    background: '#0f172a',
+    borderRadius: 12
+  }}
+  onMouseDown={(e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - containerRef.current.offsetLeft);
+    setScrollLeft(containerRef.current.scrollLeft);
+  }}
+  onMouseLeave={() => setIsDragging(false)}
+  onMouseUp={() => setIsDragging(false)}
+  onMouseMove={(e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    containerRef.current.scrollLeft = scrollLeft - walk;
+  }}
+>
+  <div
+    style={{
+      transform: `scale(${scale})`,
+      transformOrigin: 'top left',
+      display: 'flex',
+      gap: window.innerWidth < 768 ? 60 : 120,
+      position: 'relative'
+    }}
+  >
+    {bracket.rounds.map((round, rIdx) => (
+      <div
+        key={rIdx}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-around',
+          minHeight: `${Math.pow(2, bracket.totalRounds - rIdx) * 130}px`
+        }}
+      >
+        {round.map(match => {
+          const isChampionPath =
+  champion &&
+  (
+    match.team1?.name === champion ||
+    match.team2?.name === champion ||
+    match.winner?.name === champion
+  );
+
+          return (
+            <div
+              key={match.id}
+              id={`match-${match.id}`}
+              style={{
+  position: 'relative',
+  margin: '20px 0',
+  opacity: champion && !isChampionPath ? 0.35 : 1,
+  transition: 'all 0.4s ease'
+}}
+            >
+              <MatchCard
+                match={match}
+                isOrganizer={isOrganizer}
+                tournamentId={id}
+                categoryId={categoryId}
+                onRefresh={load}
+              />
+        
+            </div>
+            
+          );
+        })}
       </div>
+    ))}
+
+    {/* Champion Box */}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <div style={{
+        background: '#facc15',
+        padding: '20px 40px',
+        borderRadius: 12,
+        fontWeight: 900,
+        fontSize: 20,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+      }}>
+        🏆 {champion || 'TBD'}
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* ZOOM CONTROLS */}
+<div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
+  <button onClick={() => setScale(s => Math.max(0.6, s - 0.1))}>
+    ➖ Zoom Out
+  </button>
+  <button onClick={() => setScale(s => Math.min(1.8, s + 0.1))}>
+    ➕ Zoom In
+  </button>
+  <button onClick={() => setScale(1)}>
+    Reset
+  </button>
+</div>
 
       {/* Legend */}
       <div style={{ marginTop: 24, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
