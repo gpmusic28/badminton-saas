@@ -28,10 +28,10 @@ export default function TournamentDetailPage() {
     navigator.clipboard.writeText(text).then(()=>{ setCopied(key); setTimeout(()=>setCopied(''),2200); });
   };
 
-  const generateBracket = async (catId) => {
-    setGenerating(catId); setMsg({text:'',ok:true});
+  const generateBracket = async (categoryId) => {
+    setGenerating(categoryId); setMsg({text:'',ok:true});
     try {
-      const res = await API.post('/brackets/generate',{tournamentId:id,categoryId:catId});
+      const res = await API.post('/brackets/generate',{tournamentId:id,categoryId:categoryId});
       setMsg({text:`✅ Bracket generated — ${res.data.totalTeams} teams, ${res.data.bracket.byeCount} BYEs`,ok:true});
       load();
     } catch(err){ setMsg({text:'❌ '+( err.response?.data?.error||'Failed'),ok:false}); }
