@@ -6,7 +6,7 @@ const auth = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ','');
     if (!token) return res.status(401).json({ error: 'Authentication required' });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.userId).select('-password');
     if (!user || !user.isActive)
   return res.status(401).json({ error: 'Account inactive or not found' });
     user.lastLogin = new Date(); await user.save();
@@ -22,6 +22,6 @@ auth.require = (perm, getTournamentId) => async (req, res, next) => {
   if (!req.user.hasPermission(perm, tid)) return res.status(403).json({ error: `Permission denied: ${perm}` });
   next();
 };
-console.log("Decoded ID:", decoded.id);
+console.log("Decoded userId:", decoded.userId);
 console.log("Mongo URI:", process.env.MONGODB_URI);
 module.exports = auth;
