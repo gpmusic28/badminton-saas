@@ -83,7 +83,7 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
               {isWinner && '✓ '}{slot.isBye ? '— BYE —' : slot.team?.name || 'TBD'}
             </span>
             {(match.status === 'live' || match.status === 'completed') && !slot.isBye && (
-              <span style={{ fontWeight: 900, fontSize: 16, color: '#1e293b', marginLeft: 8, fontFamily: 'monospace' }}>
+              <span style={{ fontWeight: 900, fontSize: 16, color: '#f1f1f1', marginLeft: 8, fontFamily: 'monospace' }}>
                 {match.status === 'completed' ? setScore : ptScore ?? '0'}
               </span>
             )}
