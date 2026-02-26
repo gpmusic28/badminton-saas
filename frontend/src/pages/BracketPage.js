@@ -80,7 +80,7 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
 }
 
 export default function BracketPage() {
-  const { id, catId } = useParams();
+  const { id, categoryId } = useParams();
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [tournament, setTournament] = useState(null);
@@ -89,7 +89,7 @@ export default function BracketPage() {
 
   const load = async () => {
     try {
-      const res = await API.get(`/brackets/${id}/${catId}`);
+      const res = await API.get(`/brackets/${id}/${categoryId}`);
       setData(res.data);
       if (user) {
         API.get(`/tournaments/my`).then(r => setTournament(r.data?.find(t => t._id === id)));
