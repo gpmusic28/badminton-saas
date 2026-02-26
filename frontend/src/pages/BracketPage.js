@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../api';
 import { useAuth } from '../context/AuthContext';
-const matchRefs = React.useRef({});
+
 const pulseStyle = `
 @keyframes livePulse {
   0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
@@ -28,76 +28,7 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
     } catch (err) { alert(err.response?.data?.error || 'Error'); }
     setLoading(false);
   };
-const renderConnectors = () => {
-  if (!bracket?.rounds) return null;
 
-  const lines = [];
-
-  bracket.rounds.forEach((round, rIdx) => {
-    if (rIdx === bracket.rounds.length - 1) return;
-
-    round.forEach((match, mIdx) => {
-      const nextMatch =
-        bracket.rounds[rIdx + 1][Math.floor(mIdx / 2)];
-
-      if (!nextMatch) return;
-
-      const fromEl = matchRefs.current[match.id];
-      const toEl = matchRefs.current[nextMatch.id];
-
-      if (!fromEl || !toEl) return;
-
-      const fromRect = fromEl.getBoundingClientRect();
-      const toRect = toEl.getBoundingClientRect();
-      const containerRect =
-        containerRef.current.getBoundingClientRect();
-
-      const x1 = fromRect.right - containerRect.left;
-      const y1 =
-        fromRect.top +
-        fromRect.height / 2 -
-        containerRect.top;
-
-      const x2 = toRect.left - containerRect.left;
-      const y2 =
-        toRect.top +
-        toRect.height / 2 -
-        containerRect.top;
-
-      const isWinnerPath =
-        nextMatch.winner &&
-        (nextMatch.winner.id === match.team1?.id ||
-          nextMatch.winner.id === match.team2?.id);
-
-      lines.push(
-        <path
-          key={`${match.id}-${nextMatch.id}`}
-          d={`M ${x1} ${y1}
-              H ${x1 + 40}
-              V ${y2}
-              H ${x2}`}
-          fill="none"
-          stroke={isWinnerPath ? '#22c55e' : '#cbd5e1'}
-          strokeWidth={isWinnerPath ? 3 : 1.5}
-          style={{
-            transition: 'all 0.4s ease'
-          }}
-        />
-      );
-    });
-  });
-
-  return lines;
-};
-const [, forceUpdate] = useState(0);
-
-useEffect(() => {
-  const handleResize = () =>
-    forceUpdate(n => n + 1);
-  window.addEventListener('resize', handleResize);
-  return () =>
-    window.removeEventListener('resize', handleResize);
-}, []);
   const isBye = match.team1IsBye || match.team2IsBye;
   const t1Sets = match.scores?.filter(s => s.team1 > s.team2).length || 0;
   const t2Sets = match.scores?.filter(s => s.team2 > s.team1).length || 0;
@@ -197,6 +128,8 @@ export default function BracketPage() {
   const [loading, setLoading] = useState(true);
   const [umpireCode, setUmpireCode] = useState('');
   const containerRef = React.useRef(null);
+  const matchRefs = React.useRef({});
+const [, forceUpdate] = useState(0);
 const [scale, setScale] = useState(1);
 const [isDragging, setIsDragging] = useState(false);
 const [startX, setStartX] = useState(0);
@@ -219,7 +152,11 @@ const [scrollLeft, setScrollLeft] = useState(0);
   const i = setInterval(load, 5000);
   return () => clearInterval(i);
 }, [id, categoryId]);
-
+useEffect(() => {
+  const handleResize = () => forceUpdate(n => n + 1);
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 // Auto-focus LIVE match
 useEffect(() => {
   if (!data?.bracket) return;
@@ -248,6 +185,65 @@ useEffect(() => {
   );
 
   const { bracket } = data;
+  const renderConnectors = () => {
+  if (!bracket?.rounds) return null;
+
+  const lines = [];
+
+  bracket.rounds.forEach((round, rIdx) => {
+    if (rIdx === bracket.rounds.length - 1) return;
+
+    round.forEach((match, mIdx) => {
+      const nextMatch =
+        bracket.rounds[rIdx + 1][Math.floor(mIdx / 2)];
+
+      if (!nextMatch) return;
+
+      const fromEl = matchRefs.current[match.id];
+      const toEl = matchRefs.current[nextMatch.id];
+
+      if (!fromEl || !toEl || !containerRef.current) return;
+
+      const fromRect = fromEl.getBoundingClientRect();
+      const toRect = toEl.getBoundingClientRect();
+      const containerRect =
+        containerRef.current.getBoundingClientRect();
+
+      const x1 = fromRect.right - containerRect.left;
+      const y1 =
+        fromRect.top +
+        fromRect.height / 2 -
+        containerRect.top;
+
+      const x2 = toRect.left - containerRect.left;
+      const y2 =
+        toRect.top +
+        toRect.height / 2 -
+        containerRect.top;
+
+      const isWinnerPath =
+        nextMatch.winner &&
+        (nextMatch.winner.id === match.team1?.id ||
+         nextMatch.winner.id === match.team2?.id);
+
+      lines.push(
+        <path
+          key={`${match.id}-${nextMatch.id}`}
+          d={`M ${x1} ${y1}
+              H ${x1 + 40}
+              V ${y2}
+              H ${x2}`}
+          fill="none"
+          stroke={isWinnerPath ? '#22c55e' : '#cbd5e1'}
+          strokeWidth={isWinnerPath ? 3 : 1.5}
+          style={{ transition: 'all 0.4s ease' }}
+        />
+      );
+    });
+  });
+
+  return lines;
+};
   const finalRound = bracket.rounds[bracket.rounds.length - 1];
 const finalMatch = finalRound?.[0];
 const champion = finalMatch?.winner?.name || null;
