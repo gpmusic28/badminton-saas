@@ -22,6 +22,4 @@ auth.require = (perm, getTournamentId) => async (req, res, next) => {
   if (!req.user.hasPermission(perm, tid)) return res.status(403).json({ error: `Permission denied: ${perm}` });
   next();
 };
-console.log("Decoded userId:", decoded.userId);
-console.log("Mongo URI:", process.env.MONGODB_URI);
 module.exports = auth;
