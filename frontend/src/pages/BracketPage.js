@@ -217,11 +217,7 @@ const champion = finalMatch?.winner?.name || null;
     overflow: 'auto',
     cursor: isDragging ? 'grabbing' : 'grab',
     padding: '60px 40px',
-    background: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
-    background: `
-  linear-gradient(135deg, #1f2937 0%, #374151 100%),
-  radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%)
-`,
+    background: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)',
     borderRadius: 12
   }}
   onMouseDown={(e) => {
