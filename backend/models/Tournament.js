@@ -44,8 +44,8 @@ const tournamentSchema = new mongoose.Schema({
     name: { type: String, required: true },
     type: { type: String, enum: ['singles', 'doubles', 'mixed'], required: true },
     gender: { type: String, enum: ['men', 'women', 'mixed'], required: true },
-    ageGroup: { type: String, enum: ['open', 'u15', 'u17', 'u19', 'senior'], default: 'open' },
-    
+    ageGroup: { type: String, enum: ['open', 'u11','u13','u15', 'u17', 'u19', 'senior'], default: 'open' },
+    entryFee: { type: Number, default: 0 },
     // FULLY CUSTOMIZABLE RULES PER CATEGORY
     rules: {
       // Format type
