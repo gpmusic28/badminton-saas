@@ -4,7 +4,26 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const router = express.Router();
+// GET single public tournament (for registration page)
+router.get('/public/:id', async (req, res) => {
+  try {
+    const tournament = await Tournament.findById(req.params.id);
 
+    if (!tournament) {
+      return res.status(404).json({ error: 'Tournament not found' });
+    }
+
+    // Optional: Only allow public tournaments
+    if (!tournament.settings?.allowPublicRegistration) {
+      return res.status(403).json({ error: 'Public registration disabled' });
+    }
+
+    res.json(tournament);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.get('/public', async (req,res) => {
   try {
     const { search, status } = req.query;
