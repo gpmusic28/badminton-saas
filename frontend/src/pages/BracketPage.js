@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../api';
 import { useAuth } from '../context/AuthContext';
+const matchRefs = React.useRef({});
 const pulseStyle = `
 @keyframes livePulse {
   0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
@@ -27,7 +28,76 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
     } catch (err) { alert(err.response?.data?.error || 'Error'); }
     setLoading(false);
   };
+const renderConnectors = () => {
+  if (!bracket?.rounds) return null;
 
+  const lines = [];
+
+  bracket.rounds.forEach((round, rIdx) => {
+    if (rIdx === bracket.rounds.length - 1) return;
+
+    round.forEach((match, mIdx) => {
+      const nextMatch =
+        bracket.rounds[rIdx + 1][Math.floor(mIdx / 2)];
+
+      if (!nextMatch) return;
+
+      const fromEl = matchRefs.current[match.id];
+      const toEl = matchRefs.current[nextMatch.id];
+
+      if (!fromEl || !toEl) return;
+
+      const fromRect = fromEl.getBoundingClientRect();
+      const toRect = toEl.getBoundingClientRect();
+      const containerRect =
+        containerRef.current.getBoundingClientRect();
+
+      const x1 = fromRect.right - containerRect.left;
+      const y1 =
+        fromRect.top +
+        fromRect.height / 2 -
+        containerRect.top;
+
+      const x2 = toRect.left - containerRect.left;
+      const y2 =
+        toRect.top +
+        toRect.height / 2 -
+        containerRect.top;
+
+      const isWinnerPath =
+        nextMatch.winner &&
+        (nextMatch.winner.id === match.team1?.id ||
+          nextMatch.winner.id === match.team2?.id);
+
+      lines.push(
+        <path
+          key={`${match.id}-${nextMatch.id}`}
+          d={`M ${x1} ${y1}
+              H ${x1 + 40}
+              V ${y2}
+              H ${x2}`}
+          fill="none"
+          stroke={isWinnerPath ? '#22c55e' : '#cbd5e1'}
+          strokeWidth={isWinnerPath ? 3 : 1.5}
+          style={{
+            transition: 'all 0.4s ease'
+          }}
+        />
+      );
+    });
+  });
+
+  return lines;
+};
+const [, forceUpdate] = useState(0);
+
+useEffect(() => {
+  const handleResize = () =>
+    forceUpdate(n => n + 1);
+  window.addEventListener('resize', handleResize);
+  return () =>
+    window.removeEventListener('resize', handleResize);
+}, []);
   const isBye = match.team1IsBye || match.team2IsBye;
   const t1Sets = match.scores?.filter(s => s.team1 > s.team2).length || 0;
   const t2Sets = match.scores?.filter(s => s.team2 > s.team1).length || 0;
@@ -38,7 +108,10 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
     width: 230,
     borderRadius: 14,
     overflow: 'hidden',
-    background: '#1e293b',
+    background:
+  match.status === 'completed'
+    ? '#ffffff'
+    : '#243447',
     color: '#f1f5f9',
     border: match.winner
       ? '2px solid #22d3ee'
@@ -71,7 +144,11 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
         const ptScore = i === 0 ? match.currentScore?.team1 : match.currentScore?.team2;
         return (
           <div key={i} style={{ padding: '8px 12px', borderBottom: i === 0 ? '1px solid #f1f5f9' : 'none', background: isWinner ? '#eff6ff' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 12, fontWeight: isWinner ? 800 : 500, color: slot.isBye ? '#94a3b8' : isWinner ? '#1e40af' : '#374151', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 12, fontWeight: isWinner ? 800 : 500, color: slot.isBye
+  ? '#94a3b8'
+  : match.status === 'completed'
+  ? '#1e293b'
+  : '#f1f5f9', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {isWinner && '✓ '}{slot.isBye ? '— BYE —' : slot.team?.name || 'TBD'}
             </span>
             {(match.status === 'live' || match.status === 'completed') && !slot.isBye && (
@@ -250,6 +327,19 @@ const champion = finalMatch?.winner?.name || null;
       position: 'relative'
     }}
   >
+    <svg
+  style={{
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    overflow: 'visible'
+  }}
+>
+  {renderConnectors()}
+</svg>
     <div style={{
   position: 'absolute',
   top: 0,
@@ -264,7 +354,7 @@ const champion = finalMatch?.winner?.name || null;
         style={{
   display: 'flex',
   flexDirection: 'column',
-  gap: `${80 * Math.pow(2, rIdx)}px`,
+  gap: `${60 * Math.pow(2, rIdx)}px`,
   justifyContent: 'center'
 }}
       >
@@ -279,8 +369,9 @@ const champion = finalMatch?.winner?.name || null;
 
           return (
             <div
-              key={match.id}
-              id={`match-${match.id}`}
+  key={match.id}
+  id={`match-${match.id}`}
+  ref={el => (matchRefs.current[match.id] = el)}
               style={{
   position: 'relative',
   margin: '20px 0',
