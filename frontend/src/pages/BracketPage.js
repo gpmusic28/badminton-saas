@@ -56,7 +56,12 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
       : 'none'
   }}
 >
-      <div style={{ background: match.status === 'live' ? '#10b981' : match.status === 'completed' ? '#3b82f6' : '#f8fafc', padding: '5px 10px', display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: match.status === 'live' || match.status === 'completed' ? '#fff' : '#94a3b8' }}>
+      <div style={{ background:
+  match.status === 'live'
+    ? 'linear-gradient(90deg, #10b981, #059669)'
+    : match.status === 'completed'
+    ? 'linear-gradient(90deg, #3b82f6, #2563eb)'
+    : '#334155', padding: '5px 10px', display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 700, color: match.status === 'live' || match.status === 'completed' ? '#fff' : '#94a3b8' }}>
         <span>{match.round} M{match.matchNumber}</span>
         <span>{statusLabels[match.status] || '⏳'}</span>
       </div>
@@ -83,7 +88,6 @@ function MatchCard({ match, onStart, isOrganizer, tournamentId, categoryId, onRe
             <button onClick={() => setShowStart(true)} style={{ width: '100%', padding: '6px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 11 }}>▶ Start Match</button>
           ) : (
             <div>
-              <style>{pulseStyle}</style>
               <input value={court} onChange={e => setCourt(e.target.value)} placeholder="Court #" style={{ width: '100%', padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 12, marginBottom: 4 }} />
               <select value={server} onChange={e => setServer(e.target.value)} style={{ width: '100%', padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: 5, fontSize: 12, marginBottom: 6 }}>
                 <option value="team1">Serving: {match.team1?.name?.substring(0, 15)}</option>
@@ -174,6 +178,7 @@ const champion = finalMatch?.winner?.name || null;
 
   return (
     <div style={{ padding: '24px 16px', maxWidth: 1400, margin: '0 auto' }}>
+      <style>{pulseStyle}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>🏆 {data.category}</h1>
@@ -211,8 +216,9 @@ const champion = finalMatch?.winner?.name || null;
   style={{
     overflow: 'auto',
     cursor: isDragging ? 'grabbing' : 'grab',
-    padding: window.innerWidth < 768 ? '40px 20px' : '60px 40px',
-    background: '#0f172a',
+    padding: '60px 40px',
+    gap: 120,
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     borderRadius: 12
   }}
   onMouseDown={(e) => {
@@ -246,7 +252,7 @@ const champion = finalMatch?.winner?.name || null;
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-around',
-          minHeight: `${Math.pow(2, bracket.totalRounds - rIdx) * 130}px`
+          minHeight: `${round.length * 160}px`
         }}
       >
         {round.map(match => {
@@ -265,7 +271,7 @@ const champion = finalMatch?.winner?.name || null;
               style={{
   position: 'relative',
   margin: '20px 0',
-  opacity: champion && !isChampionPath ? 0.35 : 1,
+  opacity: 1,
   transition: 'all 0.4s ease'
 }}
             >
