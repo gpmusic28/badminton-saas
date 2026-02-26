@@ -67,7 +67,7 @@ export default function DashboardPage() {
                 <p style={{ color: '#64748b', fontSize: 13, marginBottom: 12 }}>📅 {new Date(t.startDate).toLocaleDateString()} – {new Date(t.endDate).toLocaleDateString()}</p>
                 <p style={{ color: '#94a3b8', fontSize: 12, marginBottom: 16 }}>{t.categories?.length || 0} categories</p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button onClick={() => navigate(`/tournaments/${t._id}/manage`)} style={{ flex: 1, padding: '8px 12px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Manage</button>
+                  <button onClick={() => navigate(`/tournaments/${t._id}`)} style={{ flex: 1, padding: '8px 12px', background: '#1e3a5f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Manage</button>
                   <button onClick={() => navigate(`/tournaments/${t._id}/registrations`)} style={{ flex: 1, padding: '8px 12px', background: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Entries</button>
                   {t.status === 'draft' && (
                     <button onClick={() => publish(t._id)} style={{ flex: 1, padding: '8px 12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Publish</button>
