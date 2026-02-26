@@ -35,7 +35,9 @@ function App() {
 function AppContent() {
   const { user } = useAuth();
   const isUmpirePage = window.location.pathname === '/umpire';
-  const isPublicAuthPage = ['/login', '/signup', '/register', '/forgot-password'].includes(window.location.pathname);
+  const isPublicRegister = window.location.pathname.includes('/tournaments/') && window.location.pathname.includes('/register');
+const isPublicAuthPage =
+  ['/login', '/signup', '/register', '/forgot-password'].includes(window.location.pathname) || isPublicRegister;
 
   return (
     <>
