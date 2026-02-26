@@ -5,7 +5,9 @@ import API from '../api';
    DESIGN SYSTEM
 ══════════════════════════════════════════════════════════ */
 const C = {
-  bg: '#04080f', surface: '#0b1220', elevated: '#111c2e',
+  bg: '#0f172a',          // was #04080f
+  surface: '#111827',     // was #0b1220
+  elevated: '#1e293b',    // was #111c2e
   border: 'rgba(255,255,255,0.06)', borderHover: 'rgba(255,255,255,0.12)',
   brand: '#00d4ff', brandDim: 'rgba(0,212,255,0.12)',
   green: '#00e676', greenDim: 'rgba(0,230,118,0.12)',
@@ -453,6 +455,107 @@ function TossFlow({ match: initMatch, tournamentData, onMatchReady, onBack }) {
 /* ══════════════════════════════════════════════════════════
    LIVE SCORING
 ══════════════════════════════════════════════════════════ */
+const TeamPanel = React.memo(function TeamPanel({
+  teamName,
+  points,
+  onClick,
+  isServing,
+  flashColor,
+  flash,
+  sideHint,
+  borderSide
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        padding: '20px 12px',
+        position: 'relative',
+        background: flash ? flashColor + '20' : 'transparent',
+        transition: 'background 0.1s',
+        borderRight: borderSide === 'right' ? `1px solid ${C.border}` : undefined,
+        borderLeft: borderSide === 'left' ? `1px solid ${C.border}` : undefined,
+      }}
+    >
+      {isServing && (
+        <div style={{
+          position: 'absolute',
+          top: 16,
+          right: borderSide === 'right' ? 16 : undefined,
+          left: borderSide === 'left' ? 16 : undefined,
+          background: C.greenDim,
+          border: `1px solid ${C.green}40`,
+          color: C.green,
+          fontSize: 10,
+          fontWeight: 800,
+          padding: '4px 10px',
+          borderRadius: 20,
+          fontFamily: font,
+          letterSpacing: 1
+        }}>
+          🏸 SERVING
+        </div>
+      )}
+
+      <div style={{
+        color: C.textSub,
+        fontSize: 11,
+        fontFamily: font,
+        letterSpacing: 3,
+        textTransform: 'uppercase',
+        marginBottom: 16,
+        textAlign: 'center'
+      }}>
+        {teamName}
+      </div>
+
+      <div style={{
+        fontFamily: font,
+        fontSize: 'clamp(80px, 12vw, 180px)',
+        fontWeight: 900,
+        color: flash ? flashColor : C.white,
+        lineHeight: 1,
+        transition: 'color 0.1s',
+        textShadow: flash ? glow(flashColor) : 'none'
+      }}>
+        {points}
+      </div>
+
+      <div style={{
+        color: C.textMuted,
+        fontSize: 11,
+        marginTop: 16,
+        fontFamily: font
+      }}>
+        {sideHint}
+      </div>
+    </div>
+  );
+});
+const Clock = React.memo(() => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const i = setInterval(() => setTime(new Date()), 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
+    <div style={{
+      color: C.textMuted,
+      fontSize: 11,
+      fontFamily: font
+    }}>
+      {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+    </div>
+  );
+});
 function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete }) {
   const [match, setMatch] = useState(initMatch);
   const [flash, setFlash] = useState(null);
@@ -531,7 +634,7 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
           </div>
           <div style={{ color: C.textSub, fontSize: 11, marginTop: 1 }}>{match.categoryName} · {match.round} M{match.matchNumber} · CT {match.courtNumber}</div>
         </div>
-        <div style={{ color: C.textMuted, fontSize: 11, fontFamily: font }}>{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+        <Clock />
       </div>
 
       {/* ALERT BANNER */}
@@ -582,40 +685,62 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
       )}
 
       {/* MAIN SCORING PANELS */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* TEAM 1 */}
-        <div onClick={() => addPoint('team1')}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: flash === 'team1' ? 'rgba(0,212,255,0.12)' : 'transparent', transition: 'background 0.1s', borderRight: `1px solid ${C.border}`, padding: '20px 12px', position: 'relative', animation: flash === 'team1' ? 'flashGreen 0.3s ease' : 'none' }}>
-          {match.server === 'team1' && (
-            <div style={{ position: 'absolute', top: 16, right: 16, background: C.greenDim, border: `1px solid ${C.green}40`, color: C.green, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20, fontFamily: font, letterSpacing: 1 }}>🏸 SERVING</div>
-          )}
-          <div style={{ color: C.textSub, fontSize: 11, fontFamily: font, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center', lineHeight: 1.4 }}>{match.team1?.name}</div>
-          <div style={{ fontFamily: font, fontSize: '16vw', fontWeight: 900, color: flash === 'team1' ? C.brand : C.white, lineHeight: 1, transition: 'color 0.1s', textShadow: flash === 'team1' ? glow(C.brand) : 'none' }}>{t1Pts}</div>
-          <div style={{ color: C.textMuted, fontSize: 11, marginTop: 16, fontFamily: font }}>← A</div>
-        </div>
+      {/* MAIN SCORING PANELS */}
+<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-        {/* CENTER */}
-        <div style={{ width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, flexShrink: 0 }}>
-          <div style={{ color: C.textMuted, fontFamily: font, fontWeight: 900, fontSize: 14 }}>:</div>
-          <button onClick={undo} disabled={busy} style={{ background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, color: C.textSub, padding: '10px 0', cursor: 'pointer', writingMode: 'vertical-lr', fontSize: 9, fontFamily: font, letterSpacing: 2, width: 32, transition: 'all 0.15s' }}>UNDO</button>
-        </div>
+  <TeamPanel
+    teamName={match.team1?.name}
+    points={t1Pts}
+    onClick={() => addPoint('team1')}
+    isServing={match.server === 'team1'}
+    flash={flash === 'team1'}
+    flashColor={C.brand}
+    sideHint="← A"
+    borderSide="right"
+  />
 
-        {/* TEAM 2 */}
-        <div onClick={() => addPoint('team2')}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: flash === 'team2' ? 'rgba(255,23,68,0.12)' : 'transparent', transition: 'background 0.1s', borderLeft: `1px solid ${C.border}`, padding: '20px 12px', position: 'relative', animation: flash === 'team2' ? 'flashRed 0.3s ease' : 'none' }}>
-          {match.server === 'team2' && (
-            <div style={{ position: 'absolute', top: 16, left: 16, background: C.greenDim, border: `1px solid ${C.green}40`, color: C.green, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20, fontFamily: font, letterSpacing: 1 }}>🏸 SERVING</div>
-          )}
-          <div style={{ color: C.textSub, fontSize: 11, fontFamily: font, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 16, textAlign: 'center', lineHeight: 1.4 }}>{match.team2?.name}</div>
-          <div style={{ fontFamily: font, fontSize: '16vw', fontWeight: 900, color: flash === 'team2' ? C.red : C.white, lineHeight: 1, transition: 'color 0.1s', textShadow: flash === 'team2' ? glow(C.red) : 'none' }}>{t2Pts}</div>
-          <div style={{ color: C.textMuted, fontSize: 11, marginTop: 16, fontFamily: font }}>D →</div>
-        </div>
-      </div>
+  <div style={{
+    width: 44,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
+  }}>
+    <div style={{ color: C.textMuted, fontFamily: font, fontWeight: 900 }}>:</div>
+    <button
+      onClick={undo}
+      disabled={busy}
+      style={{
+        background: C.elevated,
+        border: `1px solid ${C.border}`,
+        borderRadius: 8,
+        color: C.textSub,
+        padding: '10px 0',
+        cursor: 'pointer',
+        writingMode: 'vertical-lr',
+        fontSize: 9,
+        fontFamily: font,
+        letterSpacing: 2,
+        width: 32
+      }}
+    >
+      UNDO
+    </button>
+  </div>
 
-      {/* KEYBOARD HINT */}
-      <div style={{ background: C.surface, borderTop: `1px solid ${C.border}`, padding: '8px', textAlign: 'center', flexShrink: 0 }}>
-        <span style={{ color: C.textMuted, fontSize: 11, fontFamily: font }}>← / A &nbsp;·&nbsp; → / D &nbsp;·&nbsp; Z / BKSP = UNDO</span>
-      </div>
+  <TeamPanel
+    teamName={match.team2?.name}
+    points={t2Pts}
+    onClick={() => addPoint('team2')}
+    isServing={match.server === 'team2'}
+    flash={flash === 'team2'}
+    flashColor={C.red}
+    sideHint="D →"
+    borderSide="left"
+  />
+
+</div>
     </div>
   );
 }
@@ -686,6 +811,7 @@ export default function UmpirePortalPage() {
   if (screen === 'login') return <LoginScreen onSuccess={(data, c) => { setTournamentData(data); setCode(c); setScreen('list'); }} />;
   if (screen === 'complete') return <MatchComplete match={completedMatch} onBack={async () => { await refreshList(); setScreen('list'); }} />;
   if (screen === 'scoring') return (
+    
     <ScoringScreen
       match={activeMatch}
       tournamentData={tournamentData}
