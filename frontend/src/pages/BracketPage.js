@@ -99,7 +99,7 @@ export default function BracketPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); const i = setInterval(load, 5000); return () => clearInterval(i); }, [id, catId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); const i = setInterval(load, 5000); return () => clearInterval(i); }, [id, categoryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>Loading bracket...</div>;
   if (!data?.bracket) return (
@@ -160,7 +160,7 @@ export default function BracketPage() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {round.map(match => (
-                    <MatchCard key={match.id} match={match} isOrganizer={isOrganizer} tournamentId={id} categoryId={catId} onRefresh={load} />
+                    <MatchCard key={match.id} match={match} isOrganizer={isOrganizer} tournamentId={id} categoryId={categoryId} onRefresh={load} />
                   ))}
                 </div>
               </div>
