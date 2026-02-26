@@ -8,7 +8,10 @@ const router = express.Router();
 router.get('/public', async (req,res) => {
   try {
     const { search, status } = req.query;
-    const filter = { isPublic: true, status: { $in: status ? [status] : ['published','in_progress','completed'] } };
+    const filter = {
+  'settings.allowPublicRegistration': true,
+  status: { $in: status ? [status] : ['upcoming','live','completed'] }
+};
     if (search) filter.name = { $regex: search, $options: 'i' };
     res.json(await Tournament.find(filter).select('-categories.bracket').sort({ startDate: -1 }).limit(50));
   } catch(e){ res.status(500).json({ error: e.message }); }
