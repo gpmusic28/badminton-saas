@@ -32,13 +32,25 @@ router.get('/:id', auth, async (req,res) => {
   } catch(e){ res.status(500).json({ error: e.message }); }
 });
 
-router.post('/', auth, upload.fields([{name:'logo',maxCount:1}]), async (req,res) => {
+router.post('/', auth, async (req,res) => {
   try {
-    const data = JSON.parse(req.body.data || '{}');
-    if (req.files?.logo?.[0]) data.logo = `/uploads/${req.files.logo[0].filename}`;
-    const t = await Tournament.create({ ...data, organizer: req.user._id, organizerName: req.user.name });
-    res.status(201).json(t);
-  } catch(e){ res.status(500).json({ error: e.message }); }
+    const t = await Tournament.create({
+      ...req.body,
+
+      // attach automatically
+      organization: req.user.organizationId || req.user.organization,
+      organizer: req.user._id
+    });
+
+    res.status(201).json({
+      success: true,
+      tournament: t
+    });
+
+  } catch(e){
+    console.error(e);
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.put('/:id', auth, upload.fields([{name:'logo',maxCount:1}]), async (req,res) => {
