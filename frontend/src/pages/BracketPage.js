@@ -177,7 +177,13 @@ const champion = finalMatch?.winner?.name || null;
   const isOrganizer = user && tournament?.organizer === user.id;
 
   return (
-    <div style={{ padding: '24px 16px', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{
+  padding: '24px 16px',
+  maxWidth: 1400,
+  margin: '0 auto',
+  borderRadius: 12,
+  minHeight: '100vh'
+}}>
       <style>{pulseStyle}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
@@ -244,14 +250,22 @@ const champion = finalMatch?.winner?.name || null;
       position: 'relative'
     }}
   >
+    <div style={{
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  pointerEvents: 'none'
+}} />
     {bracket.rounds.map((round, rIdx) => (
       <div
         key={rIdx}
         style={{
   display: 'flex',
   flexDirection: 'column',
-  gap: `${Math.pow(2, rIdx) * 40}px`,
-  paddingTop: `${Math.pow(2, rIdx - 1) * 40}px`
+  gap: `${80 * Math.pow(2, rIdx)}px`,
+  justifyContent: 'center'
 }}
       >
         {round.map(match => {
