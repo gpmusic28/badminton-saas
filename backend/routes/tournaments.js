@@ -4,6 +4,25 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const router = express.Router();
+
+router.get('/public', async (req,res) => {
+  try {
+    const { search, status } = req.query;
+    const filter = { isPublic: true, status: { $in: status ? [status] : ['published','in_progress','completed'] } };
+    if (search) filter.name = { $regex: search, $options: 'i' };
+    res.json(await Tournament.find(filter).select('-categories.bracket').sort({ startDate: -1 }).limit(50));
+  } catch(e){ res.status(500).json({ error: e.message }); }
+});
+
+router.get('/my', auth, async (req,res) => {
+  try { res.json(await Tournament.find({ organizer: req.user._id }).sort({ createdAt: -1 })); }
+  catch(e){ res.status(500).json({ error: e.message }); }
+});
+
+router.get('/staff', auth, async (req,res) => {
+  try { res.json(await Tournament.find({ 'staff.user': req.user._id }).sort({ createdAt: -1 })); }
+  catch(e){ res.status(500).json({ error: e.message }); }
+});
 // GET single public tournament (for registration page)
 router.get('/public/:id', async (req, res) => {
   try {
@@ -24,25 +43,6 @@ router.get('/public/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get('/public', async (req,res) => {
-  try {
-    const { search, status } = req.query;
-    const filter = { isPublic: true, status: { $in: status ? [status] : ['published','in_progress','completed'] } };
-    if (search) filter.name = { $regex: search, $options: 'i' };
-    res.json(await Tournament.find(filter).select('-categories.bracket').sort({ startDate: -1 }).limit(50));
-  } catch(e){ res.status(500).json({ error: e.message }); }
-});
-
-router.get('/my', auth, async (req,res) => {
-  try { res.json(await Tournament.find({ organizer: req.user._id }).sort({ createdAt: -1 })); }
-  catch(e){ res.status(500).json({ error: e.message }); }
-});
-
-router.get('/staff', auth, async (req,res) => {
-  try { res.json(await Tournament.find({ 'staff.user': req.user._id }).sort({ createdAt: -1 })); }
-  catch(e){ res.status(500).json({ error: e.message }); }
-});
-
 router.get('/:id', auth, async (req,res) => {
   try {
     const t = await Tournament.findById(req.params.id).populate('staff.user','name email role');
