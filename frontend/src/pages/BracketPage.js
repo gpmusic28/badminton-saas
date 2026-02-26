@@ -186,7 +186,7 @@ useEffect(() => {
 
   const { bracket } = data;
   const renderConnectors = () => {
-  if (!bracket?.rounds) return null;
+  if (!bracket?.rounds || !containerRef.current) return null;
 
   const lines = [];
 
@@ -202,24 +202,17 @@ useEffect(() => {
       const fromEl = matchRefs.current[match.id];
       const toEl = matchRefs.current[nextMatch.id];
 
-      if (!fromEl || !toEl || !containerRef.current) return;
+      if (!fromEl || !toEl) return;
 
-      const fromRect = fromEl.getBoundingClientRect();
-      const toRect = toEl.getBoundingClientRect();
-      const containerRect =
-        containerRef.current.getBoundingClientRect();
-
-      const x1 = fromRect.right - containerRect.left;
+      const x1 =
+        (fromEl.offsetLeft + fromEl.offsetWidth) / scale;
       const y1 =
-        fromRect.top +
-        fromRect.height / 2 -
-        containerRect.top;
+        (fromEl.offsetTop + fromEl.offsetHeight / 2) / scale;
 
-      const x2 = toRect.left - containerRect.left;
+      const x2 =
+        toEl.offsetLeft / scale;
       const y2 =
-        toRect.top +
-        toRect.height / 2 -
-        containerRect.top;
+        (toEl.offsetTop + toEl.offsetHeight / 2) / scale;
 
       const isWinnerPath =
         nextMatch.winner &&
@@ -230,9 +223,9 @@ useEffect(() => {
         <path
           key={`${match.id}-${nextMatch.id}`}
           d={`M ${x1} ${y1}
-              H ${x1 + 40}
-              V ${y2}
-              H ${x2}`}
+    C ${x1 + 60} ${y1},
+      ${x2 - 60} ${y2},
+      ${x2} ${y2}`}
           fill="none"
           stroke={isWinnerPath ? '#22c55e' : '#cbd5e1'}
           strokeWidth={isWinnerPath ? 3 : 1.5}
