@@ -217,8 +217,11 @@ const champion = finalMatch?.winner?.name || null;
     overflow: 'auto',
     cursor: isDragging ? 'grabbing' : 'grab',
     padding: '60px 40px',
-    gap: 120,
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    background: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
+    background: `
+  linear-gradient(135deg, #1f2937 0%, #374151 100%),
+  radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%)
+`,
     borderRadius: 12
   }}
   onMouseDown={(e) => {
@@ -241,7 +244,7 @@ const champion = finalMatch?.winner?.name || null;
       transform: `scale(${scale})`,
       transformOrigin: 'top left',
       display: 'flex',
-      gap: window.innerWidth < 768 ? 60 : 120,
+      gap: 120,
       position: 'relative'
     }}
   >
@@ -249,11 +252,11 @@ const champion = finalMatch?.winner?.name || null;
       <div
         key={rIdx}
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-around',
-          minHeight: `${round.length * 160}px`
-        }}
+  display: 'flex',
+  flexDirection: 'column',
+  gap: `${Math.pow(2, rIdx) * 40}px`,
+  paddingTop: `${Math.pow(2, rIdx - 1) * 40}px`
+}}
       >
         {round.map(match => {
           const isChampionPath =
