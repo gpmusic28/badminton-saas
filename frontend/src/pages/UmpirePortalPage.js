@@ -118,20 +118,15 @@ function LoginScreen({ onSuccess }) {
 
     setCode(clean);
   }}
+  placeholder="ENTER CODE"
   style={{
-    position: 'absolute',
-    inset: 0,
-    width: '100%',
-    height: 60,
-    fontSize: 24,
-    letterSpacing: 8,
+    ...styles.input,
+    padding: '18px',
+    fontSize: 22,
+    fontFamily: font,
+    letterSpacing: 6,
     textAlign: 'center',
-    background: 'transparent',
-    color: 'transparent',
-    caretColor: C.brand,
-    border: 'none',
-    outline: 'none',
-    zIndex: 5
+    marginBottom: 16
   }}
 />
           {/* Visual code display */}
