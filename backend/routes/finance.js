@@ -20,7 +20,6 @@ router.get("/:tournamentId", auth, async (req, res) => {
     // Get approved registrations
    const registrations = await Registration.find({
   tournament: tournamentId,
-  status: "approved"   // optional but recommended
 });
 
 
@@ -44,27 +43,51 @@ console.log("Tournament categories:", tournament.categories);
 // Get tournament with categories
 
 let entryIncome = 0;
+let expectedRevenue = 0;
+
 const categoryMap = {};
 
 registrations.forEach(reg => {
   const category = tournament.categories.find(
-  c => c.name?.trim() === reg.categoryName?.trim()
-);
+    c => c.name?.trim() === reg.categoryName?.trim()
+  );
 
   const fee = parseFloat(category?.entryFee) || 0;
-  entryIncome += fee;
 
   if (!categoryMap[reg.categoryName]) {
     categoryMap[reg.categoryName] = {
       categoryName: reg.categoryName,
-      entries: 0,
       entryFee: fee,
-      total: 0
+      totalEntries: 0,
+      verifiedCount: 0,
+      pendingCount: 0,
+      rejectedCount: 0,
+      freeCount: 0,
+      expectedRevenue: 0,
+      collectedRevenue: 0
     };
   }
 
-  categoryMap[reg.categoryName].entries += 1;
-  categoryMap[reg.categoryName].total += fee;
+  const cat = categoryMap[reg.categoryName];
+
+  cat.totalEntries += 1;
+  cat.expectedRevenue += fee;
+  expectedRevenue += fee;
+
+  if (reg.paymentStatus === "verified") {
+    cat.verifiedCount += 1;
+    cat.collectedRevenue += fee;
+    entryIncome += fee;
+  } 
+  else if (reg.paymentStatus === "submitted") {
+    cat.pendingCount += 1;
+  } 
+  else if (reg.paymentStatus === "rejected") {
+    cat.rejectedCount += 1;
+  } 
+  else if (reg.paymentStatus === "not_required") {
+    cat.freeCount += 1;
+  }
 });
 
 const categoryBreakdown = Object.values(categoryMap);
@@ -83,13 +106,14 @@ const totalIncome = entryIncome + sponsorshipIncome;
 const netProfit = totalIncome - totalExpense;
     res.json({
       summary: {
-        totalRegistrations: registrations.length,
-        entryIncome,
-        sponsorshipIncome,
-        totalExpense,
-        totalIncome,
-        netProfit
-      },
+  totalRegistrations: registrations.length,
+  expectedRevenue,
+  collectedRevenue: entryIncome,
+  sponsorshipIncome,
+  totalExpense,
+  totalIncome: entryIncome + sponsorshipIncome,
+  netProfit: (entryIncome + sponsorshipIncome) - totalExpense
+},
       categories: categoryBreakdown,
       expenses: finance.expenses,
       sponsorships: finance.sponsorships

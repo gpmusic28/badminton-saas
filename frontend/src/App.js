@@ -16,7 +16,7 @@ import PublicTournamentsPage from './pages/PublicTournamentsPage';
 import PublicRegisterPage from './pages/PublicRegisterPage';
 import UmpirePortalPage from './pages/UmpirePortalPage';
 import TeamManagementPage from './pages/TeamManagementPage';
-
+import FinancePage from "./pages/FinancePage";
 function PrivateRoute({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" />;
@@ -49,6 +49,7 @@ const isPublicAuthPage =
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/tournaments/public" element={<PublicTournamentsPage />} />
         <Route path="/tournaments/:id/register" element={<PublicRegisterPage />} />
+        <Route path="/finance/:tournamentId" element={<FinancePage />} />
         <Route path="/umpire" element={<UmpirePortalPage />} />
 
         {/* Protected routes */}

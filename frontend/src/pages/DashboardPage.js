@@ -73,6 +73,9 @@ export default function DashboardPage() {
                     <button onClick={() => publish(t._id)} style={{ flex: 1, padding: '8px 12px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Publish</button>
                   )}
                   <button onClick={() => del(t._id)} style={{ padding: '8px 10px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>🗑</button>
+                  <button onClick={() => navigate(`/finance/${t._id}`)}>
+  Finance
+</button>
                 </div>
               </div>
             </div>
