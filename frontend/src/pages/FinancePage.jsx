@@ -86,6 +86,40 @@ export default function FinancePage() {
           );
         })}
       </div>
+      <h3 style={{ marginTop: 40 }}>Expenses</h3>
+
+<div style={{ marginBottom: 20 }}>
+  {data.expenses.map(e => (
+    <div key={e._id} style={{
+      display: "flex",
+      justifyContent: "space-between",
+      padding: 12,
+      background: "#1f2937",
+      marginBottom: 8,
+      borderRadius: 8
+    }}>
+      <span>{e.title}</span>
+      <span>₹{e.amount}</span>
+    </div>
+  ))}
+</div>
+<h3 style={{ marginTop: 40 }}>Sponsorships</h3>
+
+<div>
+  {data.sponsorships.map(s => (
+    <div key={s._id} style={{
+      display: "flex",
+      justifyContent: "space-between",
+      padding: 12,
+      background: "#1f2937",
+      marginBottom: 8,
+      borderRadius: 8
+    }}>
+      <span>{s.sponsor}</span>
+      <span style={{ color: "#16a34a" }}>₹{s.amount}</span>
+    </div>
+  ))}
+</div>
     </div>
   );
 }
