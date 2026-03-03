@@ -74,7 +74,7 @@ function LoginScreen({ onSuccess }) {
   const digits = code.padEnd(6, ' ').split('');
 
   return (
-    <div style={{ ...styles.fullPage, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ ...styles.fullPage, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'auto' }}>
       {/* Grid bg */}
       <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
       {/* Glow orbs */}
@@ -647,7 +647,13 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
   const currentSetNum = match.currentSet + 1;
 
   return (
-    <div style={{ ...styles.fullPage, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ 
+  ...styles.fullPage, 
+  display: 'flex', 
+  flexDirection: 'column', 
+  minHeight: '100dvh',
+  overflow: 'auto'
+}}>
       <style>{`
         @keyframes flashGreen{0%{background:rgba(0,230,118,0.25)}100%{background:transparent}}
         @keyframes flashRed{0%{background:rgba(255,23,68,0.25)}100%{background:transparent}}
