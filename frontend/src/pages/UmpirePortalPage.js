@@ -765,47 +765,6 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
 
 </div>
 
-  <TeamPanel
-    teamName={match.team1?.name}
-    points={t1Pts}
-    onClick={() => addPoint('team1')}
-    isServing={match.server === 'team1'}
-    flash={flash === 'team1'}
-    flashColor={C.brand}
-    sideHint="← A"
-    borderSide="right"
-  />
-
-  <div style={{
-    width: 44,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8
-  }}>
-    <div style={{ color: C.textMuted, fontFamily: font, fontWeight: 900 }}>:</div>
-    <button
-      onClick={undo}
-      disabled={busy}
-      style={{
-        background: C.elevated,
-        border: `1px solid ${C.border}`,
-        borderRadius: 8,
-        color: C.textSub,
-        padding: '10px 0',
-        cursor: 'pointer',
-        writingMode: 'vertical-lr',
-        fontSize: 9,
-        fontFamily: font,
-        letterSpacing: 2,
-        width: 32
-      }}
-    >
-      UNDO
-    </button>
-  </div>
-
     </div>
   );
 }
