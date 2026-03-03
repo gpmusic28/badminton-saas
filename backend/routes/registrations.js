@@ -7,34 +7,85 @@ const xlsx = require('xlsx');
 const router = express.Router();
 
 // Public: Submit registration with payment screenshot
+// Public: Secure Submit Registration
 router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
   try {
-    const data = req.body;
+    const {
+      tournamentId,
+      categoryName,
+      teamName,
+      player1Name,
+      player1Email,
+      player1Mobile,
+      player1Coach,
+      player1Arena,
+      player2Name,
+      player2Email,
+      player2Mobile,
+      player2Coach,
+      player2Arena,
+      paymentAmount
+    } = req.body;
+
+    // 1️⃣ Validate tournament
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament)
+      return res.status(404).json({ error: "Tournament not found" });
+
+    // 2️⃣ Validate category
+    const category = tournament.categories.find(
+      c => c.name === categoryName
+    );
+    if (!category)
+      return res.status(400).json({ error: "Invalid category" });
+
+    const requiredAmount = Number(category.entryFee || 0);
+    const paidAmount = Number(paymentAmount || 0);
+
+    // 3️⃣ Validate payment amount
+    if (requiredAmount !== paidAmount) {
+      return res.status(400).json({ error: "Invalid payment amount" });
+    }
+
+    // 4️⃣ Screenshot required for paid categories
+    if (requiredAmount > 0 && !req.file) {
+      return res.status(400).json({ error: "Payment screenshot required" });
+    }
+
     const reg = await Registration.create({
-      tournament: data.tournamentId,
-      categoryName: data.categoryName,
-      teamName: data.teamName,
+      tournament: tournamentId,
+      categoryName,
+      teamName,
       player1: {
-        name: data.player1Name,
-        email: data.player1Email,
-        mobile: data.player1Mobile,
-        coach: data.player1Coach,
-        arena: data.player1Arena
+        name: player1Name,
+        email: player1Email,
+        mobile: player1Mobile,
+        coach: player1Coach,
+        arena: player1Arena
       },
-      player2: data.player2Name ? {
-        name: data.player2Name,
-        email: data.player2Email,
-        mobile: data.player2Mobile,
-        coach: data.player2Coach,
-        arena: data.player2Arena
+      player2: player2Name ? {
+        name: player2Name,
+        email: player2Email,
+        mobile: player2Mobile,
+        coach: player2Coach,
+        arena: player2Arena
       } : undefined,
       paymentScreenshot: req.file ? `/uploads/${req.file.filename}` : null,
-      paymentAmount: data.paymentAmount,
-      paymentStatus: req.file ? 'submitted' : 'pending',
-      entryMode: 'form'
+      paymentAmount: requiredAmount,
+      paymentStatus: requiredAmount === 0 ? "not_required" : "submitted",
+      status: requiredAmount === 0 ? "approved" : "pending",
+      entryMode: "form"
     });
-    res.status(201).json({ message: 'Registration submitted successfully!', id: reg._id });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+
+    res.status(201).json({
+      message: "Registration submitted successfully!",
+      id: reg._id
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // Public: Check registration status

@@ -10,7 +10,7 @@ export default function PublicRegisterPage() {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState('');
   const [file, setFile] = useState(null);
-  const [form, setForm] = useState({ tournamentId: id, categoryName: '', teamName: '', player1Name: '', player1Email: '', player1Mobile: '', player1Coach: '', player1Arena: '', player2Name: '', player2Email: '', player2Mobile: '', player2Coach: '', player2Arena: '', paymentAmount: '' });
+  const [form, setForm] = useState({ tournamentId: id, categoryName: '', teamName: '', player1Name: '', player1Email: '', player1Mobile: '', player1Coach: '', player1Arena: '', player2Name: '', player2Email: '', player2Mobile: '', player2Coach: '', player2Arena: '' });
 
   useEffect(() => { API.get(`/tournaments/public/${id}`).then(r => { setTournament(r.data); setLoading(false); }).catch(() => setLoading(false)); }, [id]);
 
@@ -20,17 +20,39 @@ export default function PublicRegisterPage() {
   const isDoubles = selectedCat?.type === 'doubles';
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true); setError('');
-    try {
-      const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
-      if (file) fd.append('paymentScreenshot', file);
-      const res = await API.post('/registrations/submit', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setSuccess(res.data);
-    } catch (err) { setError(err.response?.data?.error || 'Submission failed'); }
-    setSubmitting(false);
-  };
+  e.preventDefault();
+  setSubmitting(true);
+  setError('');
+
+  try {
+    const fd = new FormData();
+
+    Object.entries(form).forEach(([k, v]) => {
+      if (v) fd.append(k, v);
+    });
+
+    if (selectedCat?.entryFee > 0) {
+      fd.append('paymentAmount', selectedCat.entryFee);
+    }
+
+    if (file) {
+      fd.append('paymentScreenshot', file);
+    }
+
+    const res = await API.post(
+      '/registrations/submit',
+      fd,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    setSuccess(res.data);
+
+  } catch (err) {
+    setError(err.response?.data?.error || 'Submission failed');
+  }
+
+  setSubmitting(false);
+};
 
   if (loading) return <div style={{ textAlign: 'center', padding: 80 }}>Loading...</div>;
   if (!tournament) return <div style={{ textAlign: 'center', padding: 80 }}>Tournament not found</div>;
@@ -54,7 +76,17 @@ export default function PublicRegisterPage() {
         {tournament.logo && <img src={`http://localhost:3001${tournament.logo}`} alt="" style={{ height: 70, borderRadius: 8, marginBottom: 12 }} />}
         <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>{tournament.name}</h1>
         <p style={{ opacity: 0.85 }}>📍 {tournament.venue} &nbsp;|&nbsp; 📅 {new Date(tournament.startDate).toLocaleDateString()} – {new Date(tournament.endDate).toLocaleDateString()}</p>
-        {tournament.requirePayment && <div style={{ marginTop: 12, background: 'rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 16px', display: 'inline-block' }}>Entry Fee: <strong>₹{tournament.entryFee}</strong></div>}
+        {selectedCat?.entryFee > 0 && (
+  <div style={{
+    marginTop: 12,
+    background: 'rgba(255,255,255,0.15)',
+    borderRadius: 8,
+    padding: '8px 16px',
+    display: 'inline-block'
+  }}>
+    Entry Fee: <strong>₹{selectedCat.entryFee}</strong>
+  </div>
+)}
       </div>
 
       {error && <div style={{ background: '#fee2e2', color: '#991b1b', padding: 16, borderRadius: 10, marginBottom: 20 }}>{error}</div>}
@@ -114,20 +146,55 @@ export default function PublicRegisterPage() {
         )}
 
         {/* Payment */}
-        {tournament.requirePayment && (
-          <div style={{ background: '#fff', borderRadius: 16, padding: 24, marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 4, color: '#1e293b' }}>💰 Payment</h3>
-            {tournament.paymentDetails && <div style={{ background: '#fefce8', border: '1px solid #fef08a', borderRadius: 8, padding: 14, marginBottom: 16, fontSize: 13, whiteSpace: 'pre-wrap', color: '#854d0e' }}>{tournament.paymentDetails}</div>}
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 5, fontSize: 13, color: '#374151' }}>Amount Paid (₹) *</label>
-              <input type="number" required value={form.paymentAmount} onChange={e => set('paymentAmount', e.target.value)} min="0" style={{ width: '100%', padding: '10px 12px', border: '2px solid #e2e8f0', borderRadius: 8, fontSize: 14 }} placeholder={tournament.entryFee} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 5, fontSize: 13, color: '#374151' }}>Upload Payment Screenshot *</label>
-              <input type="file" accept="image/*,.pdf" required onChange={e => setFile(e.target.files[0])} style={{ fontSize: 14, color: '#64748b' }} />
-            </div>
-          </div>
-        )}
+        {selectedCat?.entryFee > 0 && (
+  <div style={{ background: '#fff', borderRadius: 16, padding: 24, marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+    
+    <h3 style={{ fontWeight: 700, marginBottom: 4, color: '#1e293b' }}>
+      💰 Payment
+    </h3>
+
+    <div style={{
+      background: '#e0f2fe',
+      border: '1px solid #7dd3fc',
+      borderRadius: 8,
+      padding: 14,
+      marginBottom: 16,
+      fontSize: 14,
+      fontWeight: 600,
+      color: '#0369a1'
+    }}>
+      Entry Fee: ₹{selectedCat.entryFee}
+    </div>
+
+    {tournament.paymentDetails && (
+      <div style={{
+        background: '#fefce8',
+        border: '1px solid #fef08a',
+        borderRadius: 8,
+        padding: 14,
+        marginBottom: 16,
+        fontSize: 13,
+        whiteSpace: 'pre-wrap',
+        color: '#854d0e'
+      }}>
+        {tournament.paymentDetails}
+      </div>
+    )}
+
+    <div>
+      <label style={{ display: 'block', fontWeight: 600, marginBottom: 5, fontSize: 13, color: '#374151' }}>
+        Upload Payment Screenshot *
+      </label>
+      <input
+        type="file"
+        accept="image/*,.pdf"
+        required
+        onChange={e => setFile(e.target.files[0])}
+        style={{ fontSize: 14, color: '#64748b' }}
+      />
+    </div>
+  </div>
+)}
 
         <button type="submit" disabled={submitting} style={{ width: '100%', padding: 16, background: submitting ? '#94a3b8' : '#1e3a5f', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 17, cursor: submitting ? 'not-allowed' : 'pointer' }}>
           {submitting ? '⏳ Submitting...' : '🏸 Submit Registration'}

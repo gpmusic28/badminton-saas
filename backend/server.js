@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+const financeRoutes = require("./routes/finance");
 
 // Middleware
 app.use(cors({
@@ -30,7 +31,7 @@ app.use(cors({
 app.use(express.json());
 // Handle preflight explicitly
 app.options('*', cors());
-
+app.use("/api/finance", financeRoutes);
 // Uploads directory
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);

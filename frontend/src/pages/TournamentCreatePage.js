@@ -56,7 +56,11 @@ export default function TournamentCreatePage() {
   });
 
   const [categories, setCategories] = useState([{
-    name: 'Men Singles', type: 'singles', gender: 'men', ageGroup: 'open',
+  name: 'Men Singles',
+  type: 'singles',
+  gender: 'men',
+  ageGroup: 'open',
+  entryFee: 0,
     rules: {
       format: 'knockout',
       knockout: { singleElimination: true, doubleElimination: false, thirdPlaceMatch: false },
@@ -176,14 +180,11 @@ export default function TournamentCreatePage() {
               </div>
 
               <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 20, marginTop: 8 }}>
-                <Checkbox label="Require Entry Fee Payment" checked={form.requirePayment} onChange={e => setForm({ ...form, requirePayment: e.target.checked })} help="Players must pay to register" />
+                
                 {form.requirePayment && (
                   <>
-                    <Input label="Entry Fee (₹)" type="number" value={form.entryFee} onChange={e => setForm({ ...form, entryFee: Number(e.target.value) })} placeholder="500" />
-                    <div style={{ marginBottom: 0 }}>
-                      <label style={{ display: 'block', color: C.sub, fontSize: 12, marginBottom: 6, fontWeight: 600 }}>Payment Instructions</label>
-                      <textarea value={form.paymentDetails} onChange={e => setForm({ ...form, paymentDetails: e.target.value })} placeholder="UPI: organizer@upi&#10;Bank: ABC Bank, Acc: 1234567890&#10;Upload screenshot after payment" style={{ width: '100%', minHeight: 80, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 10, padding: '11px 14px', color: C.text, fontSize: 14, outline: 'none', fontFamily: sans, resize: 'vertical', boxSizing: 'border-box' }} />
-                    </div>
+                    
+            
                   </>
                 )}
               </div>
@@ -239,11 +240,20 @@ export default function TournamentCreatePage() {
                 </Select>
                 <Select label="Age Group" value={cat.ageGroup} onChange={e => updateCat(activeCatIdx, 'ageGroup', e.target.value)}>
                   <option value="open">Open</option>
+                  <option value="u11">Under 11</option>
+                  <option value="u13">Under 13</option>
                   <option value="u15">Under 15</option>
                   <option value="u17">Under 17</option>
                   <option value="u19">Under 19</option>
                   <option value="senior">Senior (35+)</option>
                 </Select>
+                <Input
+  label="Entry Fee (₹)"
+  type="number"
+  value={cat.entryFee || 0}
+  onChange={e => updateCat(activeCatIdx, 'entryFee', Number(e.target.value))}
+  help="Fee per team for this category"
+/>
               </div>
             </div>
 
@@ -388,6 +398,7 @@ export default function TournamentCreatePage() {
                   <div style={{ fontWeight: 700, color: C.text, fontSize: 15, marginBottom: 8 }}>{c.name}</div>
                   <div style={{ fontSize: 12, color: C.sub, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                     <span>{c.type} · {c.gender} · {c.ageGroup}</span>
+<span>₹{c.entryFee}</span>
                     <span>Best of {c.rules.bestOf} · {c.rules.pointsPerSet} pts</span>
                     <span>{c.rules.format}</span>
                     <span>{c.rules.deuce ? `Deuce (${c.rules.deuceType})` : 'No deuce'}</span>

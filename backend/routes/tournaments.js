@@ -56,17 +56,41 @@ router.get('/:id', auth, async (req,res) => {
 
 router.post('/', auth, async (req,res) => {
   try {
-    const t = await Tournament.create({
-      ...req.body,
 
-      // attach automatically
+    if (!req.body.categories || req.body.categories.length === 0) {
+      return res.status(400).json({ error: "At least one category required" });
+    }
+
+    // Validate each category
+    const validatedCategories = req.body.categories.map((cat, index) => {
+
+      if (!cat.name)
+        throw new Error(`Category name required (index ${index})`);
+
+      if (cat.entryFee === undefined || cat.entryFee === null)
+        throw new Error(`Entry fee required for ${cat.name}`);
+
+      const fee = Number(cat.entryFee);
+
+      if (isNaN(fee) || fee < 0)
+        throw new Error(`Invalid entry fee for ${cat.name}`);
+
+      return {
+        ...cat,
+        entryFee: fee
+      };
+    });
+
+    const tournament = await Tournament.create({
+      ...req.body,
+      categories: validatedCategories,
       organization: req.user.organizationId || req.user.organization,
       organizer: req.user._id
     });
 
     res.status(201).json({
       success: true,
-      tournament: t
+      tournament
     });
 
   } catch(e){
@@ -137,27 +161,49 @@ router.delete('/:id/staff/:userId', auth, async (req,res) => {
 // Category management
 router.post('/:id/categories', auth, async (req,res) => {
   try {
-    const t = await Tournament.findOne({ _id: req.params.id, organizer: req.user._id });
+    const t = await Tournament.findOne({ 
+      _id: req.params.id, 
+      organizer: req.user._id 
+    });
+
     if (!t) return res.status(403).json({ error: 'Not owner' });
-    t.categories.push(req.body); await t.save(); res.json(t);
-  } catch(e){ res.status(500).json({ error: e.message }); }
+
+    const { name, entryFee } = req.body;
+
+    if (!name) return res.status(400).json({ error: "Category name required" });
+
+    const fee = Number(entryFee);
+    if (isNaN(fee) || fee < 0)
+      return res.status(400).json({ error: "Valid entry fee required" });
+
+    t.categories.push({
+      ...req.body,
+      entryFee: fee
+    });
+
+    await t.save();
+    res.json(t);
+
+  } catch(e){ 
+    res.status(500).json({ error: e.message }); 
+  }
 });
 
-router.put('/:id/categories/:catId', auth, async (req,res) => {
+router.put('/:id/categories/:categoryId', auth, async (req,res) => {
   try {
     const t = await Tournament.findOne({ _id: req.params.id, organizer: req.user._id });
     if (!t) return res.status(403).json({ error: 'Not owner' });
-    const cat = t.categories.id(req.params.catId);
+    const cat = t.categories.id(req.params.categoryId);
     if (!cat) return res.status(404).json({ error: 'Category not found' });
     Object.assign(cat, req.body); await t.save(); res.json(t);
   } catch(e){ res.status(500).json({ error: e.message }); }
 });
 
-router.delete('/:id/categories/:catId', auth, async (req,res) => {
+router.delete('/:id/categories/:categoryId', auth, async (req,res) => {
   try {
     const t = await Tournament.findOne({ _id: req.params.id, organizer: req.user._id });
     if (!t) return res.status(403).json({ error: 'Not owner' });
-    t.categories = t.categories.filter(c => c._id.toString() !== req.params.catId);
+    t.categories = t.categories.filter(c => c._id.toString() !== req.params.categoryId);
     await t.save(); res.json(t);
   } catch(e){ res.status(500).json({ error: e.message }); }
 });
