@@ -102,14 +102,58 @@ function LoginScreen({ onSuccess }) {
           </p>
 
           {/* Hidden real input */}
-          <input
-            ref={inputRef}
-            value={code}
-            onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
-            onKeyDown={e => e.key === 'Enter' && lookup()}
-            style={{ position: 'absolute', opacity: 0, width: 1, height: 1 }}
-            maxLength={6}
-          />
+         <input
+  ref={inputRef}
+  value={code}
+  inputMode="text"
+  autoCapitalize="characters"
+  autoCorrect="off"
+  spellCheck="false"
+  maxLength={6}
+
+  onChange={(e) => {
+    const clean = e.target.value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 6);
+
+    setCode(clean);
+
+    setTimeout(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.selectionStart = el.selectionEnd = clean.length;
+      }
+    }, 0);
+  }}
+
+  onPaste={(e) => {
+    e.preventDefault();
+
+    const pasted = e.clipboardData
+      .getData('text')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 6);
+
+    setCode(pasted);
+
+    setTimeout(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.selectionStart = el.selectionEnd = pasted.length;
+      }
+    }, 0);
+  }}
+
+  style={{
+    position: 'absolute',
+    opacity: 0,
+    width: 1,
+    height: 1,
+    caretColor: 'transparent'
+  }}
+/>
 
           {/* Visual code display */}
           <div onClick={() => inputRef.current?.focus()} style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 8, cursor: 'text' }}>
