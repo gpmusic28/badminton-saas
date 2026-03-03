@@ -686,7 +686,53 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
 
       {/* MAIN SCORING PANELS */}
       {/* MAIN SCORING PANELS */}
-<div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+<div style={{ flex: 1, display: 'flex', position: 'relative' }}>
+
+  <TeamPanel
+    teamName={match.team1?.name}
+    points={t1Pts}
+    onClick={() => addPoint('team1')}
+    isServing={match.server === 'team1'}
+    flash={flash === 'team1'}
+    flashColor={C.brand}
+    sideHint="← LEFT"
+  />
+
+  <TeamPanel
+    teamName={match.team2?.name}
+    points={t2Pts}
+    onClick={() => addPoint('team2')}
+    isServing={match.server === 'team2'}
+    flash={flash === 'team2'}
+    flashColor={C.red}
+    sideHint="RIGHT →"
+  />
+
+  {/* Floating Undo */}
+  <button
+    onClick={undo}
+    disabled={busy}
+    style={{
+      position: 'absolute',
+      bottom: 20,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: C.elevated,
+      border: `1px solid ${C.border}`,
+      borderRadius: 50,
+      padding: '12px 20px',
+      fontFamily: font,
+      fontSize: 12,
+      color: C.textSub,
+      letterSpacing: 2,
+      cursor: 'pointer',
+      zIndex: 20
+    }}
+  >
+    ⟲ UNDO
+  </button>
+
+</div>
 
   <TeamPanel
     teamName={match.team1?.name}
@@ -729,18 +775,6 @@ function ScoringScreen({ match: initMatch, tournamentData, onBack, onComplete })
     </button>
   </div>
 
-  <TeamPanel
-    teamName={match.team2?.name}
-    points={t2Pts}
-    onClick={() => addPoint('team2')}
-    isServing={match.server === 'team2'}
-    flash={flash === 'team2'}
-    flashColor={C.red}
-    sideHint="D →"
-    borderSide="left"
-  />
-
-</div>
     </div>
   );
 }
