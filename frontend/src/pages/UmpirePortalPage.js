@@ -110,7 +110,6 @@ function LoginScreen({ onSuccess }) {
   autoCorrect="off"
   spellCheck="false"
   maxLength={6}
-
   onChange={(e) => {
     const clean = e.target.value
       .toUpperCase()
@@ -118,45 +117,33 @@ function LoginScreen({ onSuccess }) {
       .slice(0, 6);
 
     setCode(clean);
-
-    setTimeout(() => {
-      const el = inputRef.current;
-      if (el) {
-        el.selectionStart = el.selectionEnd = clean.length;
-      }
-    }, 0);
   }}
-
-  onPaste={(e) => {
-    e.preventDefault();
-
-    const pasted = e.clipboardData
-      .getData('text')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '')
-      .slice(0, 6);
-
-    setCode(pasted);
-
-    setTimeout(() => {
-      const el = inputRef.current;
-      if (el) {
-        el.selectionStart = el.selectionEnd = pasted.length;
-      }
-    }, 0);
-  }}
-
   style={{
     position: 'absolute',
-    opacity: 0,
-    width: 1,
-    height: 1,
-    caretColor: 'transparent'
+    inset: 0,
+    width: '100%',
+    height: 60,
+    fontSize: 24,
+    letterSpacing: 8,
+    textAlign: 'center',
+    background: 'transparent',
+    color: 'transparent',
+    caretColor: C.brand,
+    border: 'none',
+    outline: 'none',
+    zIndex: 5
   }}
 />
-
           {/* Visual code display */}
-          <div onClick={() => inputRef.current?.focus()} style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 8, cursor: 'text' }}>
+          <div
+  style={{
+    position: 'relative',
+    display: 'flex',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 8
+  }}
+>
             {digits.map((d, i) => (
               <div key={i} style={{ width: 48, height: 60, background: d.trim() ? C.elevated : C.bg, border: `2px solid ${d.trim() ? C.brand : C.border}`, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: font, fontSize: 24, fontWeight: 900, color: C.white, transition: 'all 0.15s', boxShadow: d.trim() ? `0 0 12px ${C.brand}40` : 'none', position: 'relative' }}>
                 {d.trim() || (i === code.length ? <span style={{ width: 2, height: 28, background: C.brand, display: 'block', animation: 'pulse 1s infinite' }} /> : '')}
